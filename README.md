@@ -9,6 +9,8 @@ behavioral features, calibrated ML, cost-aware decisions, and an auditable opera
 
 Maintained by Sneh.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FsnehOP9%2FSentinal-Flow&project-name=sentinelflow&root-directory=frontend)
+
 ![Dashboard placeholder](docs/assets/dashboard-placeholder.svg)
 
 ## Why it exists
@@ -160,6 +162,18 @@ The recommended scale is a Next.js frontend plus one FastAPI container, managed 
 managed Redis, protected MLflow/artifacts, private networking, and a gateway identity
 provider. Kubernetes is intentionally not required. See [deployment instructions](docs/DEPLOYMENT.md).
 
+### Vercel frontend deployment
+
+Use the **Deploy with Vercel** button above to import this repository with `frontend` as
+the root directory. No live Vercel URL is published yet: the anonymous local deployment
+attempt completed the Next.js production build but failed during Windows-only serverless
+function packaging because symlink creation is unavailable. Importing the GitHub repository
+lets Vercel build remotely and avoids that local limitation.
+
+Set `SENTINELFLOW_API_ORIGIN` in Vercel to a real HTTPS backend URL before using API-backed
+screens. Without it, the frontend intentionally returns `API_UNAVAILABLE` rather than
+pretending that a backend exists.
+
 ## Limitations and next steps
 
 - The training data and labels are synthetic; evaluation does not establish real-world
@@ -168,6 +182,8 @@ provider. Kubernetes is intentionally not required. See [deployment instructions
   reconciliation scheduler are still required for production recovery guarantees.
 - Production OIDC configuration validation and API-key verification exist, but no identity
   provider, SAML/SCIM, RLS, or production gateway is provisioned here.
+- A Vercel deployment has not yet been published; the deploy button starts the remote-build
+  flow, and the frontend still needs a real backend origin for API-backed screens.
 - Read [known limitations](docs/KNOWN_LIMITATIONS.md), the [gap register](docs/GAP_REGISTER.md),
   [security architecture](docs/SECURITY_ARCHITECTURE.md), and [runbooks](docs/RUNBOOKS.md)
   before using this outside the synthetic demo.
