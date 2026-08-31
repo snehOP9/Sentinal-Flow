@@ -89,5 +89,6 @@ output.png
 /artifacts/
 /frontend/.next/
 /frontend/node_modules/
+/frontend/.vercel/
 /data/demo/
 reports/
