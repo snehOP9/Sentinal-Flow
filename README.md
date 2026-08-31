@@ -166,7 +166,7 @@ provider. Kubernetes is intentionally not required. See [deployment instructions
 
 Use the **Deploy with Vercel** button above to import this repository with `frontend` as
 the root directory. The frontend is deployed at
-[the production deployment](https://sentinalflow-gppnfu0dj-snehs-projects-d7f0f403.vercel.app).
+[sentinalflow.vercel.app](https://sentinalflow.vercel.app).
 It currently uses Vercel Authentication, so access requires an authorised Vercel session.
 The earlier anonymous local deployment attempt completed the Next.js production build but
 failed during Windows-only serverless function packaging because symlink creation is
