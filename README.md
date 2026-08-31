@@ -167,10 +167,9 @@ provider. Kubernetes is intentionally not required. See [deployment instructions
 Use the **Deploy with Vercel** button above to import this repository with `frontend` as
 the root directory. The frontend is deployed at
 [sentinalflow.vercel.app](https://sentinalflow.vercel.app).
-It currently uses Vercel Authentication, so access requires an authorised Vercel session.
-The earlier anonymous local deployment attempt completed the Next.js production build but
-failed during Windows-only serverless function packaging because symlink creation is
-unavailable; Vercel's remote build avoids that local limitation.
+It is publicly accessible. The earlier anonymous local deployment attempt completed the
+Next.js production build but failed during Windows-only serverless function packaging
+because symlink creation is unavailable; Vercel's remote build avoids that local limitation.
 
 Set `SENTINELFLOW_API_ORIGIN` in Vercel to a real HTTPS backend URL before using API-backed
 screens. Without it, the frontend intentionally returns `API_UNAVAILABLE` rather than
@@ -184,8 +183,8 @@ pretending that a backend exists.
   reconciliation scheduler are still required for production recovery guarantees.
 - Production OIDC configuration validation and API-key verification exist, but no identity
   provider, SAML/SCIM, RLS, or production gateway is provisioned here.
-- The Vercel frontend is deployed with Vercel Authentication enabled. It still needs a real
-  backend origin for API-backed screens.
+- The Vercel frontend is deployed, but it still needs a real backend origin for API-backed
+  screens.
 - Read [known limitations](docs/KNOWN_LIMITATIONS.md), the [gap register](docs/GAP_REGISTER.md),
   [security architecture](docs/SECURITY_ARCHITECTURE.md), and [runbooks](docs/RUNBOOKS.md)
   before using this outside the synthetic demo.
