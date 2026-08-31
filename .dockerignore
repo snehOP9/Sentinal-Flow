@@ -1,0 +1,26 @@
+# Project-wide exclusions
+__pycache__
+*.pyc
+venv/
+.git
+.gitignore
+.DS_Store
+.env
+.env.*
+dist
+build
+.pytest_cache
+*.log
+
+# Build-time data is generated inside the backend image.
+data/
+mlruns/
+notebooks/
+
+# Frontend build output is never in the backend build context.
+frontend/node_modules/
+frontend/.next/
+artifacts/
+
+
+

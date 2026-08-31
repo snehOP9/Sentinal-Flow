@@ -1,0 +1,3 @@
+# pyproject.toml and uv.lock are canonical. This compatibility file is for tools
+# that require a requirements-style entry point.
+-e .

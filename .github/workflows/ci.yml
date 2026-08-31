@@ -1,0 +1,38 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install -e '.[dev]'
+      - run: ruff check backend/src tests scripts
+      - run: ruff format --check backend/src tests scripts
+      - run: mypy backend/src
+      - run: pytest -q
+      - run: python scripts/export_openapi.py && git diff --exit-code -- docs/openapi.json
+      # MLflow 3.15 currently constrains cryptography below the scanner's fixed release.
+      # Keep this narrow, documented exception until MLflow removes that upper bound.
+      - run: pip-audit --ignore-vuln PYSEC-2026-3552
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: {run: {working-directory: frontend}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22', cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run build
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t sentinelflow-api .
+      - run: docker build -t sentinelflow-web frontend

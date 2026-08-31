@@ -1,0 +1,115 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sentinelflow
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinel_local_only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel -d sentinelflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    networks: [private]
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes: [redis-data:/data]
+    networks: [private]
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--backend-store-uri", "postgresql+psycopg://sentinel:sentinel_local_only@postgres:5432/sentinelflow", "--default-artifact-root", "/mlartifacts"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes: [mlflow-artifacts:/mlartifacts]
+    networks: [private]
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sentinel:sentinel_local_only@postgres:5432/sentinelflow
+      REDIS_URL: redis://redis:6379/0
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MODEL_PATH: /app/artifacts/production/model_bundle.joblib
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      DEMO_AUTH_ENABLED: "true"
+      AUTH_MODE: demo
+      ENVIRONMENT: development
+      SCHEMA_MANAGEMENT: migrate
+    ports: ["8000:8000"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [private, public]
+
+  frontend:
+    build: ./frontend
+    environment:
+      SENTINELFLOW_API_ORIGIN: http://backend:8000
+      SENTINELFLOW_DEMO_MODE: "true"
+    ports: ["3000:3000"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks: [public]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-m", "fraud_platform.workers.outbox"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sentinel:sentinel_local_only@postgres:5432/sentinelflow
+      REDIS_URL: redis://redis:6379/0
+      MODEL_PATH: /app/artifacts/production/model_bundle.joblib
+      DEMO_AUTH_ENABLED: "true"
+      AUTH_MODE: demo
+      ENVIRONMENT: development
+      SCHEMA_MANAGEMENT: migrate
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [private]
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sentinel:sentinel_local_only@postgres:5432/sentinelflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [private]
+
+volumes:
+  postgres-data:
+  redis-data:
+  mlflow-artifacts:
+
+networks:
+  private:
+    internal: true
+  public:
