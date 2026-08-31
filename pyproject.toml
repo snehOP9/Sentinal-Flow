@@ -17,8 +17,6 @@ dependencies = [
   "httpx>=0.27,<1",
   "joblib>=1.4,<2",
   "lightgbm>=4.5,<5",
-  "matplotlib>=3.9,<4",
-  "mlflow>=3.11,<4",
   "numpy>=1.26,<3",
   "pandas>=2.2,<3",
   "prometheus-client>=0.21,<1",
@@ -26,7 +24,6 @@ dependencies = [
   "pydantic>=2.9,<3",
   "pydantic-settings>=2.5,<3",
   "PyJWT[crypto]>=2.9,<3",
-  "pyarrow>=23,<24",
   "python-json-logger>=2.0,<4",
   "redis>=5.0,<6",
   "scikit-learn>=1.5,<2",
@@ -35,6 +32,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+training = [
+  "matplotlib>=3.9,<4",
+  "mlflow>=3.11,<4",
+  "pyarrow>=23,<24",
+]
 dev = [
   "mypy>=1.11,<2",
   "pip-audit>=2.7,<3",

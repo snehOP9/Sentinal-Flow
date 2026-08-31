@@ -1,7 +1,7 @@
 .PHONY: setup generate-demo train test lint format up down benchmark migrate openapi outbox-once
 
 setup:
-	python -m pip install -e ".[dev]"
+	python -m pip install -e ".[dev,training]"
 
 generate-demo:
 	python scripts/generate_demo_transactions.py

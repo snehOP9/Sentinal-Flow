@@ -80,7 +80,7 @@ authentication and requires OIDC issuer, audience, and JWKS settings.
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,training]"
 python scripts/generate_demo_transactions.py
 python -m fraud_platform.training
 $env:DATABASE_URL = "sqlite+aiosqlite:///./data/sentinelflow.db"
