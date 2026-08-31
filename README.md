@@ -162,18 +162,29 @@ The recommended scale is a Next.js frontend plus one FastAPI container, managed 
 managed Redis, protected MLflow/artifacts, private networking, and a gateway identity
 provider. Kubernetes is intentionally not required. See [deployment instructions](docs/DEPLOYMENT.md).
 
-### Vercel frontend deployment
+### Live Vercel demo
 
-Use the **Deploy with Vercel** button above to import this repository with `frontend` as
-the root directory. The frontend is deployed at
-[sentinalflow.vercel.app](https://sentinalflow.vercel.app).
-It is publicly accessible. The earlier anonymous local deployment attempt completed the
-Next.js production build but failed during Windows-only serverless function packaging
-because symlink creation is unavailable; Vercel's remote build avoids that local limitation.
+The public demo is deployed at [sentinalflow.vercel.app](https://sentinalflow.vercel.app),
+with its FastAPI health endpoint at
+[sentinalflow-api.vercel.app/api/v1/health](https://sentinalflow-api.vercel.app/api/v1/health).
+The frontend production environment is configured with that API as
+`SENTINELFLOW_API_ORIGIN`, so the dashboard, transaction simulator, cases, model, and
+monitoring screens call the deployed service rather than displaying fabricated client data.
 
-Set `SENTINELFLOW_API_ORIGIN` in Vercel to a real HTTPS backend URL before using API-backed
-screens. Without it, the frontend intentionally returns `API_UNAVAILABLE` rather than
-pretending that a backend exists.
+The deployment path initially exposed three configuration failures, all now resolved:
+
+- Vercel could not auto-detect the nested FastAPI app, so the repository provides the
+  supported root `api/index.py` application entrypoint.
+- The frontend was first configured as a static site with `public` as its output folder;
+  it now uses the Next.js preset with `frontend` as the root directory.
+- The API bundle exceeded Vercel's function-size limit while training-only packages were
+  installed. Those packages are now in the `training` optional dependency group, leaving
+  the inference runtime in the deployed function.
+
+This is a publicly accessible, **synthetic-data-only demo**. Its Vercel API uses the
+development demo-auth profile and a SQLite database under `/tmp`; data can disappear when
+the serverless runtime is replaced. Do not send payment data, credentials, or other
+sensitive information, and do not treat it as a durable production service.
 
 ## Limitations and next steps
 
@@ -183,8 +194,9 @@ pretending that a backend exists.
   reconciliation scheduler are still required for production recovery guarantees.
 - Production OIDC configuration validation and API-key verification exist, but no identity
   provider, SAML/SCIM, RLS, or production gateway is provisioned here.
-- The Vercel frontend is deployed, but it still needs a real backend origin for API-backed
-  screens.
+- The Vercel demo's database and online feature state are ephemeral. A production rollout
+  needs managed PostgreSQL and Redis, production OIDC, private networking, and an
+  independently deployed outbox worker.
 - Read [known limitations](docs/KNOWN_LIMITATIONS.md), the [gap register](docs/GAP_REGISTER.md),
   [security architecture](docs/SECURITY_ARCHITECTURE.md), and [runbooks](docs/RUNBOOKS.md)
   before using this outside the synthetic demo.
