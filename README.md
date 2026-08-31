@@ -174,6 +174,9 @@ provider. Kubernetes is intentionally not required. See [deployment instructions
 
 ## Attribution and license status
 
+The current SentinelFlow implementation is available under the [MIT License](LICENSE).
+Earlier source material is not covered by that grant; see [NOTICE.md](NOTICE.md).
+
 The repository was cloned from an upstream repository that had no `LICENSE` at the audited
 revision. See [NOTICE.md](NOTICE.md). No claim is made that upstream files are available
 for proprietary reuse or relicensing; SentinelFlow’s new implementation is documented as a

@@ -7,6 +7,7 @@ name = "sentinelflow"
 version = "0.1.0"
 description = "Production-oriented reference architecture for real-time fraud-risk intelligence."
 authors = [{name = "Sneh"}]
+license = {text = "MIT"}
 requires-python = ">=3.11"
 dependencies = [
   "aiosqlite>=0.20,<1",
