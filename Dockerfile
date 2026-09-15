@@ -10,7 +10,7 @@ COPY pyproject.toml ./
 COPY backend ./backend
 COPY scripts ./scripts
 
-RUN pip install --no-cache-dir --prefix=/install .
+RUN pip install --no-cache-dir --prefix=/install '.[training]'
 RUN PYTHONPATH=/install/lib/python3.11/site-packages python scripts/generate_demo_transactions.py --output data/demo/transactions.csv \
     && PYTHONPATH=/install/lib/python3.11/site-packages python -m fraud_platform.training \
         --data data/demo/transactions.csv \
