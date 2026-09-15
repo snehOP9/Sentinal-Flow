@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import pandas as pd
+from fraud_platform.data.contracts import DataContractError, temporal_split, validate_transactions
 import pytest
 
-from fraud_platform.data.contracts import DataContractError, temporal_split, validate_transactions
 from fraud_platform.features.point_in_time import build_offline_features
 
 
