@@ -18,6 +18,7 @@ jobs:
       - run: python scripts/export_openapi.py && git diff --exit-code -- docs/openapi.json
       # MLflow 3.15 currently constrains cryptography below the scanner's fixed release.
       # Keep this narrow, documented exception until MLflow removes that upper bound.
+      - run: python -m pip install --upgrade 'setuptools>=83'
       - run: pip-audit --ignore-vuln PYSEC-2026-3552
   frontend:
     runs-on: ubuntu-latest
