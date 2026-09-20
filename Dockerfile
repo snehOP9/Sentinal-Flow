@@ -10,7 +10,10 @@ COPY pyproject.toml ./
 COPY backend ./backend
 COPY scripts ./scripts
 
-RUN pip install --no-cache-dir --prefix=/install .
+# Keep the runtime dependency set in /install, while installing the training-only
+# extras in the disposable builder environment for model/artifact generation.
+RUN pip install --no-cache-dir --prefix=/install . \
+    && pip install --no-cache-dir '.[training]'
 RUN PYTHONPATH=/install/lib/python3.11/site-packages python scripts/generate_demo_transactions.py --output data/demo/transactions.csv \
     && PYTHONPATH=/install/lib/python3.11/site-packages python -m fraud_platform.training \
         --data data/demo/transactions.csv \
