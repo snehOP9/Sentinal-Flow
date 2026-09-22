@@ -1,0 +1,42 @@
+name: Production health
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-health
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Verify frontend production
+    runs-on: ubuntu-latest
+    environment:
+      name: Production – sentinalfloww
+      url: https://sentinalflow.vercel.app
+    steps:
+      - name: Check live frontend
+        run: |
+          curl             --fail             --silent             --show-error             --location             --retry 3             --retry-all-errors             --connect-timeout 10             --max-time 30             https://sentinalflow.vercel.app/             --output /tmp/sentinelflow.html
+          grep -q "SentinelFlow" /tmp/sentinelflow.html
+
+  api:
+    name: Verify API production
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: https://sentinalflow-api.vercel.app/api/v1/health
+    steps:
+      - name: Check API health
+        run: |
+          curl             --fail             --silent             --show-error             --retry 3             --retry-all-errors             --connect-timeout 10             --max-time 30             https://sentinalflow-api.vercel.app/api/v1/health             | jq -e '
+                .status == "ok"
+                and .checks.model == true
+                and .checks.database == true
+                and .checks.online_feature_store == true
+              '
