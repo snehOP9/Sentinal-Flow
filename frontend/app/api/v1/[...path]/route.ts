@@ -6,10 +6,28 @@ export const dynamic = "force-dynamic";
 
 type Method = "GET" | "POST";
 
+function getApiOrigin() {
+  const configuredOrigin = process.env.SENTINELFLOW_API_ORIGIN?.trim();
+  if (configuredOrigin) return configuredOrigin;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SENTINELFLOW_API_ORIGIN is required in production");
+  }
+  return "http://localhost:8000";
+}
+
 async function proxy(request: Request, context: { params: Promise<{ path: string[] }> }, method: Method) {
   const { path } = await context.params;
   const incoming = new URL(request.url);
-  const origin = process.env.SENTINELFLOW_API_ORIGIN ?? "http://localhost:8000";
+  let origin: string;
+  try {
+    origin = getApiOrigin();
+  } catch {
+    return NextResponse.json(
+      { code: "API_MISCONFIGURED", detail: "The SentinelFlow API is not configured.", retryable: false },
+      { status: 503 },
+    );
+  }
+
   const upstream = new URL(`/api/v1/${path.map(encodeURIComponent).join("/")}`, origin);
   upstream.search = incoming.search;
   const headers = new Headers({ accept: "application/json" });
