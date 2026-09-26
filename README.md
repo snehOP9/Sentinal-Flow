@@ -79,7 +79,7 @@ authentication and requires OIDC issuer, audience, and JWKS settings.
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.\\.venv\\Scripts\\Activate.ps1
 python -m pip install -e ".[dev,training]"
 python scripts/generate_demo_transactions.py
 python -m fraud_platform.training
@@ -97,16 +97,16 @@ tests. Compose runs `alembic upgrade head`; non-development configuration refuse
 ## ML methodology
 
 1. Validate required fields, amounts, timestamps, unique IDs, and binary labels; create a
-   fingerprint that travels with model metadata.
+  fingerprint that travels with model metadata.
 2. Sort event-time groups and construct each row's features against strict historical
-   state. Current/equal timestamp records are not available.
+  state. Current/equal timestamp records are not available.
 3. Split time consecutively: earliest 70% training, following 15% validation, latest 15%
-   untouched test. Exact boundaries are emitted into `artifacts/production/metrics.json`.
+  untouched test. Exact boundaries are emitted into `artifacts/production/metrics.json`.
 4. Compare dummy prior, logistic regression, random forest, histogram gradient boosting,
-   and LightGBM on validation PR-AUC. Calibrate the selected model with sigmoid and
-   isotonic candidates using Brier score.
+  and LightGBM on validation PR-AUC. Calibrate the selected model with sigmoid and
+  isotonic candidates using Brier score.
 5. Optimize allow/block thresholds against explicit fraud loss, false-decline cost, review
-   cost, review capture rate, and review capacity—not arbitrary constants.
+  cost, review capture rate, and review capacity—not arbitrary constants.
 
 Read [ML evaluation](docs/ML_EVALUATION.md) and the [model card](docs/MODEL_CARD.md).
 Actual metrics are generated from the exact committed generator and exposed at
@@ -171,21 +171,6 @@ The frontend production environment is configured with that API as
 `SENTINELFLOW_API_ORIGIN`, so the dashboard, transaction simulator, cases, model, and
 monitoring screens call the deployed service rather than displaying fabricated client data.
 
-The deployment path initially exposed three configuration failures, all now resolved:
-
-- Vercel could not auto-detect the nested FastAPI app, so the repository provides the
-  supported root `api/index.py` application entrypoint.
-- The frontend was first configured as a static site with `public` as its output folder;
-  it now uses the Next.js preset with `frontend` as the root directory.
-- The API bundle exceeded Vercel's function-size limit while training-only packages were
-  installed. Those packages are now in the `training` optional dependency group, leaving
-  the inference runtime in the deployed function.
-
-This is a publicly accessible, **synthetic-data-only demo**. Its Vercel API uses the
-development demo-auth profile and a SQLite database under `/tmp`; data can disappear when
-the serverless runtime is replaced. Do not send payment data, credentials, or other
-sensitive information, and do not treat it as a durable production service.
-
 ## Limitations and next steps
 
 - The training data and labels are synthetic; evaluation does not establish real-world
@@ -206,7 +191,13 @@ sensitive information, and do not treat it as a durable production service.
 The current SentinelFlow implementation is available under the [MIT License](LICENSE).
 Earlier source material is not covered by that grant; see [NOTICE.md](NOTICE.md).
 
-The repository was cloned from an upstream repository that had no `LICENSE` at the audited
+The repository was cloned from an upstream repository that had no LICENSE at the audited
 revision. See [NOTICE.md](NOTICE.md). No claim is made that upstream files are available
 for proprietary reuse or relicensing; SentinelFlow’s new implementation is documented as a
 clean implementation of the concepts.
+
+## Development workflow
+
+For reproducible local work, use the repository's Make targets and test commands before
+creating a release or deployment. Keep generated datasets, model artefacts, logs, and local
+environment files outside version control.
