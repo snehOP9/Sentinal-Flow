@@ -426,12 +426,17 @@ class DecisionRepository:
                 )
             ).one()
             total, latency, blocks, reviews, allows = aggregate
+            total_count = cast(int, total)
+            latency_ms = cast(float | int, latency)
+            block_count = cast(int, blocks)
+            review_count = cast(int, reviews)
+            allow_count = cast(int, allows)
             return {
-                "transactions_screened": int(total),
-                "fraud_alerts": int(blocks + reviews),
-                "approval_rate": float(allows / total) if total else 0.0,
-                "manual_review_rate": float(reviews / total) if total else 0.0,
-                "average_inference_latency_ms": round(float(latency), 2),
+                "transactions_screened": total_count,
+                "fraud_alerts": block_count + review_count,
+                "approval_rate": float(allow_count / total_count) if total_count else 0.0,
+                "manual_review_rate": float(review_count / total_count) if total_count else 0.0,
+                "average_inference_latency_ms": round(float(latency_ms), 2),
                 "estimated_loss_prevented": None,
                 "false_positive_rate": None,
                 "fraud_capture_rate": None,
@@ -468,7 +473,11 @@ class DecisionRepository:
                 )
             ).all()
             return [
-                {"date": str(date), "transactions": int(transactions), "alerts": int(alerts)}
+                {
+                    "date": str(date),
+                    "transactions": int(cast(int, transactions)),
+                    "alerts": int(cast(int, alerts)),
+                }
                 for date, transactions, alerts in rows
             ]
 
