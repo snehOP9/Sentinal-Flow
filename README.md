@@ -64,7 +64,7 @@ building; no real payment data is bundled or required. Compose runs Alembic befo
 
 ```bash
 git clone <your-fork-url>
-cd fraud-detection-system
+cd Sentinal-Flow
 cp .env.example .env
 docker compose up --build
 ```
