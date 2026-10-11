@@ -224,7 +224,7 @@ def create_app(
                 principal = await auth.authenticate(request)
             except AuthenticationError as exc:
                 raise Problem(
-                    401, "AUTHENTICATION_REQUIRED", "Authentication required", str(exc)
+                    401, "AUTHENTICATION_REQUIRED", "Authentication required", "Valid authentication credentials are required."
                 ) from exc
             if not principal.allows(permission):
                 raise Problem(
