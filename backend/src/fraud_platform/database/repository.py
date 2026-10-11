@@ -425,13 +425,20 @@ class DecisionRepository:
                     )
                 )
             ).one()
-            total, latency, blocks, reviews, allows = aggregate
+            total, latency, blocks, reviews, allows = cast(
+                tuple[int, float, int, int, int], aggregate
+            )
+            total = int(total or 0)
+            latency = float(latency or 0)
+            blocks = int(blocks or 0)
+            reviews = int(reviews or 0)
+            allows = int(allows or 0)
             return {
-                "transactions_screened": int(total),
-                "fraud_alerts": int(blocks + reviews),
-                "approval_rate": float(allows / total) if total else 0.0,
-                "manual_review_rate": float(reviews / total) if total else 0.0,
-                "average_inference_latency_ms": round(float(latency), 2),
+                "transactions_screened": total,
+                "fraud_alerts": blocks + reviews,
+                "approval_rate": allows / total if total else 0.0,
+                "manual_review_rate": reviews / total if total else 0.0,
+                "average_inference_latency_ms": round(latency, 2),
                 "estimated_loss_prevented": None,
                 "false_positive_rate": None,
                 "fraud_capture_rate": None,
@@ -467,9 +474,14 @@ class DecisionRepository:
                     .order_by(func.date(TransactionDecision.created_at))
                 )
             ).all()
+            typed_rows = cast(list[tuple[Any, int, int]], rows)
             return [
-                {"date": str(date), "transactions": int(transactions), "alerts": int(alerts)}
-                for date, transactions, alerts in rows
+                {
+                    "date": str(date),
+                    "transactions": int(transactions or 0),
+                    "alerts": int(alerts or 0),
+                }
+                for date, transactions, alerts in typed_rows
             ]
 
     async def record_outcome(
