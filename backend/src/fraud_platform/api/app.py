@@ -108,12 +108,15 @@ def create_app(
             "type": f"https://sentinelflow.local/errors/{problem.code}",
             "code": problem.code,
             "title": problem.title,
-            "detail": str(problem.detail),
+            "detail": (
+                "An internal service error occurred; use the request ID when contacting support."
+                if problem.status_code >= 500 else str(problem.detail)
+            ),
             "status": problem.status_code,
             "request_id": request_id,
             "retryable": problem.retryable,
         }
-        if problem.fields:
+        if problem.fields and problem.status_code < 500:
             payload["fields"] = problem.fields
         return JSONResponse(
             status_code=problem.status_code, content=payload, headers=problem.headers
