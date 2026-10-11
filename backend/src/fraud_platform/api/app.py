@@ -294,7 +294,7 @@ def create_app(
                 503,
                 "SCORING_DEPENDENCY_UNAVAILABLE",
                 "Scoring dependency unavailable",
-                str(exc),
+                "The scoring dependency is temporarily unavailable.",
                 retryable=True,
             ) from exc
         if created:
