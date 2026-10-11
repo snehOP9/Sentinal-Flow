@@ -108,12 +108,16 @@ def create_app(
             "type": f"https://sentinelflow.local/errors/{problem.code}",
             "code": problem.code,
             "title": problem.title,
-            "detail": str(problem.detail),
+            "detail": (
+                "An internal service error occurred; use the request ID when contacting support."
+                if problem.status_code >= 500
+                else str(problem.detail)
+            ),
             "status": problem.status_code,
             "request_id": request_id,
             "retryable": problem.retryable,
         }
-        if problem.fields:
+        if problem.fields and problem.status_code < 500:
             payload["fields"] = problem.fields
         return JSONResponse(
             status_code=problem.status_code, content=payload, headers=problem.headers
@@ -164,7 +168,12 @@ def create_app(
             > runtime_settings.request_max_bytes
         ):
             return problem_response(
-                Problem(413, "REQUEST_TOO_LARGE", "Request body too large", "Reduce request size."),
+                Problem(
+                    413,
+                    "REQUEST_TOO_LARGE",
+                    "Request body too large",
+                    "Reduce request size.",
+                ),
                 request_id,
             )
         client = request.client.host if request.client else "unknown"
@@ -189,7 +198,10 @@ def create_app(
             logger.exception("Unhandled request error", extra={"request_id": request_id})
             response = problem_response(
                 Problem(
-                    500, "INTERNAL_ERROR", "Internal server error", "An unexpected error occurred."
+                    500,
+                    "INTERNAL_ERROR",
+                    "Internal server error",
+                    "An unexpected error occurred.",
                 ),
                 request_id,
             )
@@ -221,7 +233,10 @@ def create_app(
                 principal = await auth.authenticate(request)
             except AuthenticationError as exc:
                 raise Problem(
-                    401, "AUTHENTICATION_REQUIRED", "Authentication required", str(exc)
+                    401,
+                    "AUTHENTICATION_REQUIRED",
+                    "Authentication required",
+                    "Valid authentication credentials are required.",
                 ) from exc
             if not principal.allows(permission):
                 raise Problem(
@@ -291,7 +306,7 @@ def create_app(
                 503,
                 "SCORING_DEPENDENCY_UNAVAILABLE",
                 "Scoring dependency unavailable",
-                str(exc),
+                "The scoring dependency is temporarily unavailable.",
                 retryable=True,
             ) from exc
         if created:
