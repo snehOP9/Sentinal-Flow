@@ -425,13 +425,16 @@ class DecisionRepository:
                     )
                 )
             ).one()
-            total, latency, blocks, reviews, allows = aggregate
+            total, latency, blocks, reviews, allows = (
+                int(value or 0) if index != 1 else float(value or 0)
+                for index, value in enumerate(aggregate)
+            )
             return {
-                "transactions_screened": int(total),
-                "fraud_alerts": int(blocks + reviews),
-                "approval_rate": float(allows / total) if total else 0.0,
-                "manual_review_rate": float(reviews / total) if total else 0.0,
-                "average_inference_latency_ms": round(float(latency), 2),
+                "transactions_screened": total,
+                "fraud_alerts": blocks + reviews,
+                "approval_rate": allows / total if total else 0.0,
+                "manual_review_rate": reviews / total if total else 0.0,
+                "average_inference_latency_ms": round(latency, 2),
                 "estimated_loss_prevented": None,
                 "false_positive_rate": None,
                 "fraud_capture_rate": None,
@@ -468,7 +471,11 @@ class DecisionRepository:
                 )
             ).all()
             return [
-                {"date": str(date), "transactions": int(transactions), "alerts": int(alerts)}
+                {
+                    "date": str(date),
+                    "transactions": int(transactions or 0),
+                    "alerts": int(alerts or 0),
+                }
                 for date, transactions, alerts in rows
             ]
 
