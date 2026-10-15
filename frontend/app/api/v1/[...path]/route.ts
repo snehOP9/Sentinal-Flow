@@ -9,7 +9,14 @@ type Method = "GET" | "POST";
 async function proxy(request: Request, context: { params: Promise<{ path: string[] }> }, method: Method) {
   const { path } = await context.params;
   const incoming = new URL(request.url);
-  const origin = process.env.SENTINELFLOW_API_ORIGIN ?? "http://localhost:8000";
+  const configuredOrigin = process.env.SENTINELFLOW_API_ORIGIN?.trim();
+  if (!configuredOrigin && process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      { code: "API_NOT_CONFIGURED", detail: "The backend API origin is not configured.", retryable: false },
+      { status: 503 },
+    );
+  }
+  const origin = configuredOrigin || "http://localhost:8000";
   const upstream = new URL(`/api/v1/${path.map(encodeURIComponent).join("/")}`, origin);
   upstream.search = incoming.search;
   const headers = new Headers({ accept: "application/json" });
