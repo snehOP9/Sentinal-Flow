@@ -63,8 +63,8 @@ The Docker image creates its **entirely fictional** demo dataset and trains its 
 building; no real payment data is bundled or required. Compose runs Alembic before the API.
 
 ```bash
-git clone <your-fork-url>
-cd fraud-detection-system
+git clone https://github.com/snehOP9/Sentinal-Flow.git
+cd Sentinal-Flow
 cp .env.example .env
 docker compose up --build
 ```
